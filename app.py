@@ -19,10 +19,29 @@ def retrieve() -> dict:
     return response.json()
 
 
+def de_tuple(tl: list):
+    stuff = []
+    for tup in tl:
+        for thing in tup:
+            stuff.append(thing)
+    return stuff
+
+
+def wipe(cur: sqlite3.Cursor):
+    tables = de_tuple(
+        cur.execute(
+            """SELECT name FROM sqlite_master WHERE type='table';"""
+        ).fetchall()
+    )
+    for table in tables:
+        cur.execute("DROP table %s;" % table)
+
+
 def config_database(response: dict):
     db_path = os.getcwd() + "/data/gvsac.db"
     db = sqlite3.connect(db_path)
     cur = db.cursor()
+    wipe(cur)
     for year in response.keys():
         cur.execute(
             f"""CREATE TABLE baseball_{year} (key TEXT, player_name TEXT);"""
