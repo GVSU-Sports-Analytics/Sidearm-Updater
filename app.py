@@ -43,15 +43,18 @@ def add_players(cur: sqlite3.Cursor, data):
     for year, players in data.items():
         for player_name, info in players.items():
             cur.execute(
-                f"""INSERT INTO baseball_{year} (key, player_name) VALUES('{info["number"]}', '{player_name.replace("'", "''")}');"""
+                "INSERT OR IGNORE INTO baseball_{} (key, player_name) VALUES(?, ?)".format(
+                    year),
+                (info["number"], player_name)
             )
             for col, val in info.items():
                 if not column_exists(cur, col, f"baseball_{year}"):
                     cur.execute(
-                        f"""ALTER TABLE baseball_{year} ADD '{col}';"""
+                        f"ALTER TABLE baseball_{year} ADD COLUMN '{col}' TEXT"
                     )
                 cur.execute(
-                    f"""INSERT INTO baseball_{year} ('{col}') VALUES('{val.replace("'", "''")}');"""
+                    f"UPDATE baseball_{year} SET '{col}' = ? WHERE key = ?",
+                    (val, info["number"])
                 )
 
 
