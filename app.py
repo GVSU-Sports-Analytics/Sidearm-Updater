@@ -1,24 +1,67 @@
 import requests
+import sqlite3
+import json
 import os
 
 
-endpoint = os.getenv["SIDEARM_ENDPOINT"]
+def retrieve():
+    endpoint = "https://licalhost"
+    request_info = {
+        "URL": "https://gvsulakers.com"
+    }
+    response = requests.post(
+        endpoint,
+        data=json.loads(request_info)
+    )
+    return json.loads(response.json())
 
-def connect_db():
-    db_user = os.getenv["GVAPP_DB_USERNAME"]
-    db_password = os.getenv["GVAPP_DB_PASSWORD"]
-    db_host = os.getenv["GVAPP_HOST"]
 
+def config_database(response: requests.Response):
+    db_path = os.getcwd() + "/data/gvsac.db"
+    db = sqlite3.connect(db_path, check_same_thread=False)
+    cur = db.cursor()
+    for year in response:
+        cur.execute(
+            f"""CREATE TABLE baseball_{year} (id INT PRIMARY KEY, name TEXT);"""
+        )
+    return db, cur
+
+
+def add_players(cur: sqlite3.Cursor):
+    for year, players in r.RESULTS.items():
+        for player_name, info in players.items():
+            cur.execute(
+                f"""
+                    INSERT INTO baseball_{year}
+                    (id, name) 
+                    VALUES({int(info["number"])}, '{player_name}');
+                    """
+            )
+
+            for col, val in info.items():
+                cur.execute(
+                    f"""
+                        ALTER TABLE baseball_{year} 
+                        ADD '{col}';
+                        """
+                )
+
+                cur.execute(
+                    f"""
+                        INSERT INTO baseball_{year}
+                        ('{col}') 
+                        VALUES('{val}');
+                        """
+                )
 
 
 def main():
-
-    db = connect_db()
-    response = requests.post(
-            endpoint,
-        )
-
-    # then update the database
+    r = retrieve()
+    db, cur = config_database(r)
+    add_players(cur)
+    db.commit()
+    cur.close()
+    db.close()
 
 
 if __name__ == "__main__":
