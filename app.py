@@ -4,16 +4,21 @@ import json
 import os
 
 
-def retrieve():
-    endpoint = "https://licalhost"
-    request_info = {
-        "URL": "https://gvsulakers.com"
-    }
+# eventually these will be environment variables
+ENDPOINT: str = "http://127.0.0.1:3000/"
+
+REQUEST_INFO = {
+    "URL": "https://gvsulakers.com"
+}
+
+
+def retrieve() -> dict:
     response = requests.post(
-        endpoint,
-        data=json.loads(request_info)
+        ENDPOINT,
+        json=json.dumps(REQUEST_INFO)
     )
-    return json.loads(response.json())
+    print(response.json())
+    return response.json()
 
 
 def config_database(response: requests.Response):
