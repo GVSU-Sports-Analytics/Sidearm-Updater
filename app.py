@@ -9,7 +9,7 @@ ENDPOINT: str = "http://127.0.0.1:3000/"
 
 REQUEST_INFO = {
     "URL": "https://gvsulakers.com",
-    "SPORT": "baseball,football,cross-country"
+    "SPORT": "baseball,softball"
 }
 
 
